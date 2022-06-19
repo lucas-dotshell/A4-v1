@@ -1,0 +1,9 @@
+# *.env
+# *.config
+# *.key
+# *.private-key
+# *.cert
+# *.ca
+# *.ca-bundle
+# *.p7b
+node_modules
