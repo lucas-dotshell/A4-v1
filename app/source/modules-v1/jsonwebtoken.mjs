@@ -1,18 +1,21 @@
 import { sign, verify } from "jsonwebtoken";
 import { readFileSync } from "fs";
+import { VERSION } from "./vars.mjs"
+import { info } from "./logs.mjs";
 
 class Certified {
     constructor(path) {
-        console.log("PATH CERTIFIED: ", path);
+        info(`PATH CERTIFIED: ${path}`);
+        if(VERSION != "1.0.0") throw { message: "Currente version app deprecated", level: "very_high", analitycs: false } 
         super(path);
     };
     get() {
-        let cert = readFileSync(path);
+        let cert = readFileSync(this.path);
         return cert;
     };
 }
 const cert = new Certified("../../private.txt").get();
-console.log(cert)
+info(cert);
 
 const create = (obj) => {
     if (typeof obj != "object") throw { message: "Date to create token broken", level: "high", analitycs: false };

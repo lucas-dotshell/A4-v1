@@ -1,4 +1,5 @@
-# *.env
+*.env
+*.txt
 # *.config
 # *.key
 # *.private-key
