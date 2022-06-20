@@ -1,39 +1,40 @@
-import { sign, verify } from "jsonwebtoken";
-import { readFileSync } from "fs";
-import { VERSION } from "./vars.mjs"
-import { info } from "./logs.mjs";
+import jwt from "jsonwebtoken";
+import fs from "fs";
 
 class Certified {
-    constructor(path) {
-        info(`PATH CERTIFIED: ${path}`);
-        if(VERSION != "1.0.0") throw { message: "Currente version app deprecated", level: "very_high", analitycs: false } 
-        super(path);
+    constructor() {
+        this.path = "app/certs/jsonwebtoken.key";
     };
-    get() {
-        let cert = readFileSync(this.path);
-        return cert;
+    get(){
+        return fs.readFileSync(this.path, { encoding: 'utf8' }, (err, data) => {
+            if (err) throw { message: "Can't read certified jwt", level: "high", analitycs: false };
+            return data;
+        });
     };
 }
-const cert = new Certified("../../private.txt").get();
-info(cert);
+const cert = new Certified().get();
 
-const create = (obj) => {
+const createToken = (obj) => {
     if (typeof obj != "object") throw { message: "Date to create token broken", level: "high", analitycs: false };
     let exp = Math.floor(Date().now() / 1000) + 1800;
-    return sign({ ...obj, exp }, cert, (error, payload) => {
+    const token = jwt.sign({ ...obj, exp }, cert, (error, payload) => {
         if (error || !payload) throw { message: "Error to encode bearer token", level: "low", analitycs: error };
         return `Bearer ${payload}`;
     });
+    return {
+        token,
+        ...obj
+    }
 };
 
-const validate = (header) => {
+const validateToken = (header) => {
     const token = header.split("Bearer ");
     if (!token[1]) throw { message: "Token bearer invalid or expired", level: "medium", analitycs: false };
     if (typeof token[1] != "object") throw { message: "Token session invalid", level: "very_high", analitycs: false };
-    return verify(token[1], cert, (error, decoded) => {
+    return jwt.verify(token[1], cert, (error, decoded) => {
         if (error || !decoded) throw { message: "Token session invalid", level: "very_high", analitycs: error };
         return decoded;
     });
 };
 
-export default { create, validate }
+export { createToken, validateToken }
